@@ -186,5 +186,26 @@ namespace SerialCommunication
                 checkBoxDigital4.Checked = false;
             }
         }
+
+        private void trackBarPWM9_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Seriële verbinding is niet geopend.", "Fout",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                string command = $"set pwm9 {trackBarPWM9.Value}";
+                serialPortArduino.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij verzenden van commando: " + ex.Message, "Verzendingsfout",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
