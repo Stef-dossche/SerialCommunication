@@ -14,9 +14,14 @@ namespace SerialCommunication
 {
     public partial class Form1 : Form
     {
+        private SerialPort serialPortArduino;
+
         public Form1()
         {
             InitializeComponent();
+            serialPortArduino = new SerialPort();
+            serialPortArduino.ReadTimeout = 1000;
+            serialPortArduino.WriteTimeout = 1000;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -54,7 +59,63 @@ namespace SerialCommunication
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            // abc def ghi jkl
+            if (!serialPortArduino.IsOpen)
+            {
+                // Connect
+                try
+                {
+                    serialPortArduino.PortName = comboBoxPoort.SelectedItem?.ToString();
+                    serialPortArduino.BaudRate = int.Parse(comboBoxBaudrate.SelectedItem?.ToString() ?? "115200");
+                    serialPortArduino.DataBits = 8;
+                    serialPortArduino.Parity = Parity.None;
+                    serialPortArduino.StopBits = StopBits.One;
+                    serialPortArduino.Handshake = Handshake.None;
+                    serialPortArduino.RtsEnable = true;
+                    serialPortArduino.DtrEnable = true;
+
+                    serialPortArduino.Open();
+
+                    // Send ping and wait for pong
+                    serialPortArduino.WriteLine("ping");
+                    string response = serialPortArduino.ReadLine()?.Trim();
+
+                    if (response != "pong")
+                    {
+                        serialPortArduino.Close();
+                        MessageBox.Show("Arduino antwoord ongeldig. Verwacht 'pong' maar kreeg: " + (response ?? "geen antwoord"),
+                            "Ping Test Mislukt", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Update UI on success
+                    radioButtonVerbonden.Checked = true;
+                    buttonConnect.Text = "Disconnect";
+                    labelStatus.Text = $"Verbonden met {serialPortArduino.PortName} ({serialPortArduino.BaudRate} baud)";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Fout bij verbinden: " + ex.Message, "Verbindingsfout",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    if (serialPortArduino.IsOpen)
+                        serialPortArduino.Close();
+                }
+            }
+            else
+            {
+                // Disconnect
+                try
+                {
+                    serialPortArduino.Close();
+                    radioButtonVerbonden.Checked = false;
+                    buttonConnect.Text = "Connect";
+                    labelStatus.Text = "Verbroken";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Fout bij verbrinden: " + ex.Message, "Verbreekingsfout",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }
