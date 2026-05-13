@@ -207,5 +207,50 @@ namespace SerialCommunication
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex == 3)
+            {
+                timerOefening3.Start();
+            }
+            else
+            {
+                timerOefening3.Stop();
+            }
+        }
+
+        private void timerOefening3_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!serialPortArduino.IsOpen)
+                {
+                    return;
+                }
+
+                serialPortArduino.ReadExisting();
+
+                // Read digital5
+                serialPortArduino.WriteLine("get d5");
+                string response5 = serialPortArduino.ReadLine()?.Trim() ?? "";
+                radioButtonDigital5.Checked = response5 == "1";
+
+                // Read digital6
+                serialPortArduino.WriteLine("get d6");
+                string response6 = serialPortArduino.ReadLine()?.Trim() ?? "";
+                radioButtonDigital6.Checked = response6 == "1";
+
+                // Read digital7
+                serialPortArduino.WriteLine("get d7");
+                string response7 = serialPortArduino.ReadLine()?.Trim() ?? "";
+                radioButtonDigital7.Checked = response7 == "1";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij lezen van digitale ingangen: " + ex.Message, "Lezesfout",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
