@@ -218,6 +218,15 @@ namespace SerialCommunication
             {
                 timerOefening3.Stop();
             }
+
+            if (tabControl.SelectedIndex == 4)
+            {
+                timerOefening4.Start();
+            }
+            else
+            {
+                timerOefening4.Stop();
+            }
         }
 
         private void timerOefening3_Tick(object sender, EventArgs e)
@@ -249,6 +258,28 @@ namespace SerialCommunication
             catch (Exception ex)
             {
                 MessageBox.Show("Fout bij lezen van digitale ingangen: " + ex.Message, "Lezesfout",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void timerOefening4_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!serialPortArduino.IsOpen)
+                {
+                    return;
+                }
+
+                serialPortArduino.ReadExisting();
+
+                serialPortArduino.WriteLine("get a0");
+                string response = serialPortArduino.ReadLine()?.Trim() ?? "";
+                labelAnalog0.Text = response;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij lezen van analoge ingangen: " + ex.Message, "Lezesfout",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
